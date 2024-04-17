@@ -1,7 +1,5 @@
 # Named Entity Recognition
-
 ## AIM
-
 To develop an LSTM-based model for recognizing the named entities in the text.
 
 ## Problem Statement and Dataset
@@ -46,10 +44,8 @@ from sklearn.model_selection import train_test_split
 from keras import layers
 from keras.models import Model
 from sklearn import metrics
-
 from google.colab import files
 files.upload()
-
 data = pd.read_csv("ner_dataset.csv", encoding="latin1")
 data.head()
 data.head(50)
@@ -57,14 +53,11 @@ data = data.fillna(method="ffill")
 data.head(50)
 print("Unique words in corpus:", data['Word'].nunique())
 print("Unique tags in corpus:", data['Tag'].nunique())
-
 words=list(data['Word'].unique())
 words.append("ENDPAD")
 tags=list(data['Tag'].unique())
-
 num_words = len(words)
 num_tags = len(tags)
-
 num_words
 
 class SentenceGetter(object):
@@ -87,12 +80,8 @@ class SentenceGetter(object):
             return None
 getter = SentenceGetter(data)
 sentences = getter.sentences
-
 len(sentences)
-
 sentences[0]
-
-
 word2idx = {w: i + 1 for i, w in enumerate(words)}
 tag2idx = {t: i for i, t in enumerate(tags)}
 word2idx
@@ -112,13 +101,10 @@ y = sequence.pad_sequences(maxlen=max_len,
                   sequences=y1,
                   padding="post",
                   value=tag2idx["O"])
-
 X_train, X_test, y_train, y_test = train_test_split(X, y,test_size=0.2, random_state=1)
 X_train[0]
 y_train[0]
-
 input_word = layers.Input(shape=(max_len,))
-
 embedding_layer = layers.Embedding(input_dim=num_words,
                                    output_dim=50,
                                    input_length=max_len)(input_word)
@@ -127,18 +113,13 @@ dropout = layers.SpatialDropout1D(0.1)(embedding_layer)
 bid_lstm = layers.Bidirectional(
     layers.LSTM(units=50,return_sequences=True,
                 recurrent_dropout=0.1))(dropout)
-
 output = layers.TimeDistributed(
     layers.Dense(num_tags,activation="softmax"))(bid_lstm)
-
 model = Model(input_word, output)
-
 model.summary()
-
 model.compile(optimizer="adam",
               loss="sparse_categorical_crossentropy",
               metrics=["accuracy"])
-
 history = model.fit(
     x=X_train,
     y=y_train,
@@ -148,16 +129,10 @@ history = model.fit(
 )
 metrics = pd.DataFrame(model.history.history)
 metrics.head()
-
-
 print("ADHITHYARAM 212222230008")
 metrics[['accuracy','val_accuracy']].plot()
-
-
 print("ADHITHYARAM 212222230008")
 metrics[['loss','val_loss']].plot()
-
-
 i = 20
 p = model.predict(np.array([X_test[i]]))
 p = np.argmax(p, axis=-1)
